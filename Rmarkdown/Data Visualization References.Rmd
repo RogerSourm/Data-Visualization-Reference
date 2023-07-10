@@ -1,0 +1,488 @@
+---
+title: "Data Visualization References"
+author: "by Roger Sourm"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = 'center')
+```
+
+# Basic Plots
+
+Using Base R built-in data set, `mtcars`, we will display various plots.
+
+## Built-in R Functions
+
+### Scatter Plot (Single Variable)
+
+```{r fig.align='center', echo = TRUE}
+plot(mtcars$mpg)
+```
+
+The above plot uses the `mpg` variable of the `mtcars` data set. When a single variable is provided, it is plotted as the Y-axis. The plot does not provide informative insights, but instead showcases how easy it is to visualize a plot using R.
+
+### Scatter Plot (Two Variable)
+
+Using a scatter plot for two variables can help give insight to the relationship between the two variables. Below will be a scatter plot of `wt` versus `mpg` (weight vs. miles per gallon).
+
+```{r fig.align='center', echo = TRUE}
+plot(mtcars$wt, mtcars$mpg)
+```
+
+Looking at the scatter plot above, it looks as if the miles per gallon of a car decreases as the weight of the car increases.
+
+
+When two variables are provided, the first variable given by default will become the X-axis and the second variable will be the Y-axis. We can specify the order of the parameters explicitly by declaring it with its supplied argument or variable. For example, `plot(y = mtcars$mpg, x = mtcars$wt)`. The first variable given becomes the Y-axis and the second variable becomes the X-axis.
+
+### Line Chart (Single Variable)
+
+By default, `plot()` will create a scatter plot, but if we were to provide a different argument to the `type` parameter, we can get a different plot. For example, we can instead plot a line chart by implementing `type = "l"`.
+
+```{r fig.align='center', echo = TRUE}
+plot(mtcars$mpg, type = "l")
+```
+
+### Line Chart (Two Variables)
+
+```{r fig.align='center', echo = TRUE}
+plot(mtcars$wt, mtcars$mpg, type = "l")
+```
+
+As we can see above, the usage of a certain chart sometimes might not make sense. This is because the line is drawn based on the order of the observation point. It would be more insightful to use linear regression to create predictions. Linear regression will be discussed in another reference document.
+
+### Bar Plot
+
+The bar plot will use the `cyl` variable from the `mtcars` data set. `cyl` refers to the amount of cylinder in the cars.
+
+```{r fig.align='center', echo = TRUE}
+barplot(table(mtcars$cyl))
+```
+
+The `table()` function was used to aggregate the number of cylinders. Let's try using it on it's own.
+
+```{r echo = TRUE}
+table(mtcars$cyl)
+```
+
+There are 11 cars with 4 cylinders, 7 cars with 6 cylinders, and 14 cars with 8 cylinders.
+
+### Histogram
+
+Using a histogram can give us some insight to the distribution of data.
+
+```{r fig.align='center', echo = TRUE}
+hist(mtcars$mpg)
+```
+
+We can see that majority of the cars within the `mtcars` data set can run between 15 to 20 miles per gallon of gas, while very few can run between 25 to 30 miles per gallon.
+
+### Box Plot
+
+We can use a box plot to display the range, 1st quantile, median, and 3rd quantile. Below will be a box plot for the `mpg` variable of the `mtcars` data set. The `horizontal` argument will be set to `TRUE` to display the box plot horizontally rather than vertically, which is the default.
+
+```{r fig.align='center', echo = TRUE}
+boxplot(mtcars$mpg, horizontal = TRUE)
+```
+
+# Customizing the Plots
+
+The following will use the scatter plot of `wt` versus `mpg`.
+
+```{r fig.align='center'}
+plot(mtcars$wt, mtcars$mpg)
+```
+
+The plot can be customized to suit your preferences such as adding a title, axis labels, and changing the color of the data marker, title, or labels.
+
+```{r fig.align='center'}
+plot(mtcars$wt, mtcars$mpg, col = "red",
+     main = "Weight vs. Miles Per Gallon",
+     xlab = "Weight",
+     ylab = "MPG",
+     col.main = "blue",
+     col.lab = "purple")
+```
+
+Base R provides us with enough to make plots with simple customization. Next, we will showcase `ggplot2`, a package from the `tidyverse` collection that will allow us to have further control over plot customization.
+
+## `ggplot2` for Visualization
+
+The `ggplot2` package allows us to create beautiful visualization by creating a base visualization that we can add on to. For example, we will first create a simple scatter plot of `wt` versus `mpg` using `ggplot2`. Then we will add on to it. Before creating the ggplot, we first need to load the required library.
+
+```{r echo = TRUE}
+library(ggplot2)
+```
+
+### `ggplot2` Scatter Plot
+
+After loading the `ggplot2` package, we can start creating the base of a scatter plot.
+
+```{r fig.align='center', echo = TRUE}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+```
+
+We used the `ggplot()` function to create the ggplot to which we provided `mtcars` as the data argument. You would provide the data point for the x- and y-axis in the `aes()` portion of the code. With that, the ggplot knows what data it is working with and which variables will be used. The `+` symbol is used to add on to that. With the example above, we wanted to have the data become points essentially representing a scatter plot.
+
+Comparing the simple `ggplot2` scatter plot to the one made with base R, we can already see that it looks a lot better. Let's continue making it look even better.
+
+```{r fig.align='center'}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point(col = "red", shape = 21) +
+  labs(title = "Weight vs. Miles Per Gallon",
+       x = "Weight",
+       y = "MPG") +
+  theme(title = element_text(colour = "blue"),
+        axis.title = element_text(color = "darkblue", size = 20),
+        panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey"),
+        panel.grid.minor.x = element_line(color = "black"),
+        panel.grid.minor.y = element_line(color = "black"),
+        panel.grid.major.x = element_line(color = "black"),
+        panel.grid.major.y = element_line(color = "black"))
+```
+
+### `ggplot2` Scatter Plot With Regression Line
+
+Note that we can add on many other things to the plot by using more `+` following addition desired features. For example, let's add a linear regression line to the scatter plot by using `geom_smooth(method = "lm")`.
+
+```{r fig.align='center'}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point(col = "red", shape = 21) +
+  geom_smooth(method = "lm", fill = 'darkgreen') +
+  labs(title = "Weight vs. Miles Per Gallon",
+       x = "Weight",
+       y = "MPG") +
+  theme(title = element_text(colour = "blue"),
+        axis.title = element_text(color = "darkblue", size = 20),
+        panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey"),
+        panel.grid.minor.x = element_line(color = "black"),
+        panel.grid.minor.y = element_line(color = "black"),
+        panel.grid.major.x = element_line(color = "black"),
+        panel.grid.major.y = element_line(color = "black"))
+```
+
+The line that runs through the scatter plot is the linear regression line that gives us an understanding of the relationship between the two variable. This line can also be used to make predictions on new data. The area that is dark green displays the confidence interval for the regression line. This is displayed because the `se` parameter is defaulted to `TRUE`. You can turn it off using `se = FALSE`.
+
+### `ggplot2` Bar Plot
+
+```{r fig.align='center'}
+ggplot(data = mtcars, aes(x = as.factor(cyl))) +
+  geom_bar(stat = "count", color = "black",
+           fill = "red", alpha = 0.4) +
+  labs(title = "Count of Cars Based on the Number of Cylinders",
+       x = "Number of Cylinders",
+       y = NULL) +
+  theme(title = element_text(colour = "blue"),
+        axis.title = element_text(color = "darkblue"),
+        panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey")) +
+  scale_y_continuous(breaks = seq(0, 16, 2))
+```
+
+For the `x` argument, since the `cyl` variable contain only 3 possible values, the values of the `cyl` variable should be categorical, thus we need to factor the variable. We will further customize the above plot by coloring each bar a different color.
+
+```{r fig.align='center'}
+ggplot(data = mtcars, aes(x = as.factor(cyl))) +
+  geom_bar(aes(fill = as.factor(cyl)), color = "black",
+           alpha = 0.4, show.legend = FALSE) +
+  labs(title = "Count of Cars Based on the Number of Cylinders",
+       x = "Number of Cylinders",
+       y = NULL) +
+  theme(title = element_text(colour = "blue"),
+        axis.title = element_text(color = "darkblue"),
+        panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey")) +
+  scale_y_continuous(breaks = seq(0, 16, 2))
+```
+
+### `ggplot2` Histogram
+
+```{r fig.align='center'}
+ggplot(data = mtcars, aes(x = mpg)) +
+  geom_histogram(color = "black", fill = "blue", alpha = 0.4,
+                 lwd = 1, breaks = seq(10, 35, 5)) +
+  labs(title = "ggplot2 Histogram of Miles Per Gallon",
+       x = "MPG",
+       y = NULL) +
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey"),
+        title = element_text(color = "blue"),
+        axis.title = element_text(color = "darkblue")) +
+  scale_y_continuous(breaks = seq(0,14,2))
+```
+
+We can see that this histogram looks similar to the one using the base `R` function `hist()`, but a lot nicer.
+
+### `ggplot2` Box Plot
+
+```{r}
+ggplot(data = mtcars, aes(x = mpg)) +
+  geom_boxplot(fill = "blue", alpha = 0.4) +
+  labs(title = "Miles Per Gallon Box Plot",
+       x = NULL) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+```
+
+We can also apply a color filling by categorical group. For example, the following plot will display box plots for `mpg` but separated by the number of cylinders.
+
+```{r}
+ggplot(data = mtcars, aes(y = mpg)) +
+  geom_boxplot(aes(fill = factor(cyl)),
+               alpha = 0.4) +
+  labs(title = "Miles Per Gallon Box Plot",
+       y = NULL)  +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  guides(fill = guide_legend(title = "Number of Cylinders"))
+```
+
+We could also have applied a facet grid.
+
+```{r}
+ggplot(data = mtcars, aes(y = mpg)) +
+  geom_boxplot(aes(fill = factor(cyl)), alpha = 0.4,
+               show.legend = FALSE) +
+  facet_grid(~cyl) +
+  labs(title = "Miles Per Gallon Box Plot",
+       y = NULL)  +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.border = element_rect(color = "black",
+                                    fill = NA),
+        panel.grid = element_line(color = "grey"))
+```
+
+# Map Visualization
+
+## Choropleth Map
+
+Using the `map_data()` function from the `ggplot2` package, we will create a map of the United States to which each state is filled in with its own color.
+
+```{r warning = FALSE}
+states <- map_data("state")
+
+ggplot(data = states, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = factor(group)), color = "black",
+               show.legend = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme(axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    panel.background = element_rect(fill = "lightblue"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "black", size = 2,
+                                fill = NA))
+```
+
+The map above does not give much or any information at all, but it sets up as a starting template for geo-spatial data (specifically the United States in the example). The following map visualization will be using a data set provided by CSU East Bay, STAT 541 - Intro. Data Visualization. First, let's have a brief look into the data set.
+
+```{r message = FALSE, echo = TRUE}
+library(dplyr)
+library(tibble)
+```
+
+Note: The `dplyr` is included in the `tidyverse` collection and is a great package for data manipulation thanks to how it is grammatically structured when used.
+
+```{r}
+college <- read.csv(file.choose(), header = TRUE)
+```
+
+```{r}
+as_tibble(college)
+```
+
+Dimension: $1,269 \times 17$.
+
+Variables:
+  
+  * id (ID number)
+  * name (Name of college)
+  * city (City)
+  * state (State)
+  * region (Midwest/Northeast/South/West)
+  * highest_degree (Associate/Bachelor/Graduate)
+  * control (Public/Private)
+  * gender (CoEd/Women/Men)
+  * admission_rate (Admission Rate)
+  * sat_avg (SAT average)
+  * undergrads (Number of undergraduates)
+  * tuition (Tuition Cost)
+  * faculty_salary_avg (Average salary of faculty)
+  * loan_default_rate (Rate of load defaults)
+  * median_debt (Median debt)
+  * lon (Longitude)
+  * lat (Latitude)
+
+Now to correct the data types of the variables and aggregate the data to count the number of colleges within a specific state and region.
+
+```{r warning = FALSE, message = FALSE, echo = TRUE}
+# Correcting the data type of the variables.
+college <- college %>%
+  mutate(state=as.factor(state),
+  region=as.factor(region),
+  highest_degree=as.factor(highest_degree),
+  control=as.factor(control),
+  gender=as.factor(gender),
+  loan_default_rate=as.numeric(loan_default_rate))
+
+college_summary <- college %>% 
+  group_by(state, region) %>% 
+  summarise("School Count" = n())
+college_summary
+```
+
+Using the data, we will plot a map of the United States with each state being color-coded based on the number of colleges it has.
+
+```{r fig.align='center'}
+library(stringr)
+library(ggthemes)
+college_summary <- college_summary %>% 
+  mutate(region = as.character(setNames(str_to_lower(state.name), state.abb)[as.character(state)]))
+
+college_summary <- college_summary %>%
+  mutate(region = ifelse(as.character(state)=="DC", "district of columbia", region))
+
+mapdata <- inner_join(states, college_summary, by = "region")
+
+
+mapdata %>% ggplot(mapping = aes(x = long, 
+                                 y = lat, group = group)) +
+  geom_polygon(aes(fill = `School Count`),
+               color = "black") +
+  scale_fill_distiller(palette = "RdYlGn",
+                       direction = 1) +
+  labs(title = "Number of Colleges in the United States",
+       x = NULL,
+       y = NULL) +
+  theme_solarized() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.background = element_rect(fill = "lightblue"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+# Animation
+
+A beautiful plot can give use a lot of information and can be used to determine relationships, trends, clustering, and more, but implementing animation can bring the story to life.
+
+We will use the `gapminder` data set from the `gapminder` package to visualize some animated plots. Let's briefly look into the `gapminder` data set.
+
+```{r echo = TRUE}
+library(tibble)
+library(gapminder)
+as_tibble(gapminder)
+```
+
+Dimension: $1,704 \times 6$.
+
+Variables:
+  
+  * country (Country)
+  * continent (Continent)
+  * year (Year)
+  * lifeExp (Life Expectancy)
+  * pop (Population)
+  * gdpPercap (GDP per Capita)
+
+`gganimate` is the required package.
+
+```{r}
+library(gganimate)
+```
+
+## `gganimate` Scatter Plot
+
+```{r fig.align='center'}
+# Creating the template plot.
+plot1 <- gapminder %>% ggplot(aes(x = log(gdpPercap),
+                                  y = lifeExp,
+                                  size = pop,
+                                  color = country)) +
+  geom_point(show.legend = FALSE) +
+  labs(x = "log(GDP Per Capita)",
+       y = "Life Expectancy") +
+  scale_color_viridis_d(option = "G")
+
+
+# Adding the animation.
+plot1 + transition_time(year) +
+  labs(title = "Year: {frame_time}") + 
+  view_follow(fixed_y = TRUE, fixed_x = TRUE)
+```
+
+The size of the scatter point is associated with the population size of the country. There is no meaning behind the colors of the data points. It can be see that through the years, as the log of the GDP Per Capita increases, there looks to be an association with an increase to life expectancy.
+
+## `gganimate` Line Chart
+
+```{r message = FALSE}
+gapminder %>% 
+  group_by(continent, year) %>% 
+  summarize("Total" = sum(pop)/1e6) %>% 
+  ggplot(aes(x = year, y = Total)) +
+  geom_line(aes(color = continent), show.legend = FALSE) +
+  geom_label(aes(label = continent, color = continent),
+             show.legend = FALSE) +
+  transition_reveal(year) +
+  labs(title = "Year: {frame_along}",
+       x = NULL,
+       y = "Population (Millions)")
+```
+
+Clearly, the population of all the continents pale in comparison to Asia's.
+
+## `gganimate` Bar Chart With Shadow Mark
+
+```{r}
+gapminder %>% 
+  ggplot(aes(year, pop/1e6)) +
+  geom_col(aes(fill = continent), alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~factor(continent, levels = c("Asia",
+                                     "Americas",
+                                     "Africa",
+                                     "Europe",
+                                     "Oceania"))) +
+  transition_time(year) +
+  labs(title = "Year: {frame_time}",
+         y = "Population (Millions)") +
+  shadow_mark(alpha = 0.3 )
+```
+
+## `gganimate Box Plot` 
+
+```{r}
+gapminder %>%
+  ggplot(aes(y = log(pop))) + 
+  geom_boxplot(aes(fill = continent),
+               show.legend = FALSE,
+               alpha = 0.4) +
+  facet_grid(~continent) +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank()) +
+  transition_time(year) +
+  labs(title = "log(Population)",
+       subtitle = "Year: {frame_time}",
+       y = NULL)
+```
+
+# Ending Notes
+
+Data visualization helps us see data in a way that makes it easy for us to understand. It allows use to see the story that the data is telling. We can derive information from them and use that to make better decisions. This reference document will continue to be updated as I learn more about data visualization.
